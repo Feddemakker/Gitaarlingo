@@ -1,0 +1,273 @@
+/* ===== Algemeen ===== */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* geen grijze flits bij tikken */
+  user-select: none;                        /* tekst niet per ongeluk selecteren */
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", sans-serif;
+  color: #3b2a1a;
+  overflow: hidden;
+}
+
+body {
+  background: linear-gradient(#8fd3ff, #4fb3f0); /* blauwe lucht/zee */
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+/* Er is steeds maar één scherm zichtbaar */
+.scherm {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+.scherm.actief { display: flex; }
+
+/* Bovenbalk */
+.balk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+}
+.balk h1, .balk h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #fff;
+  text-shadow: 2px 2px 0 #2a7fb8;
+}
+.sterren {
+  background: #fff;
+  border-radius: 30px;
+  padding: 8px 20px;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+/* ===== De kaart ===== */
+.wereld {
+  position: relative;
+  flex: 1;
+  margin: 0 16px 16px;
+}
+.pad {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.eiland {
+  position: absolute;
+  transform: translate(-50%, -50%); /* midden van het eiland op het punt zetten */
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #ffe9a8 55%, #7ccf6b 56%);
+  box-shadow: 0 10px 0 #2f8fcf, 0 0 0 8px rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+.eiland .plaatje { font-size: 4.5rem; line-height: 1; }
+.eiland .naam {
+  font-size: 0.95rem;
+  font-weight: bold;
+  max-width: 130px;
+  text-align: center;
+}
+.eiland:active { transform: translate(-50%, -50%) scale(0.92); }
+
+/* Dicht eiland: grijs met een slotje */
+.eiland.dicht {
+  filter: grayscale(1) brightness(0.85);
+  cursor: default;
+}
+.eiland.dicht::after {
+  content: "🔒";
+  position: absolute;
+  font-size: 2.6rem;
+  right: 6px;
+  top: 0;
+}
+
+/* Open eiland wiebelt een beetje: "tik mij!" */
+.eiland.open:not(.klaar) { animation: wiebel 1.6s ease-in-out infinite; }
+@keyframes wiebel {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-3deg); }
+  50%      { transform: translate(-50%, -50%) rotate(3deg) scale(1.05); }
+}
+
+/* Klaar eiland krijgt een ster */
+.eiland.klaar::after {
+  content: "⭐";
+  position: absolute;
+  font-size: 2.6rem;
+  right: 6px;
+  top: 0;
+}
+
+#poppetje {
+  position: absolute;
+  transform: translate(-50%, -120%);
+  font-size: 4rem;
+  pointer-events: none; /* tikken gaat "door" het poppetje heen */
+  transition: left 1.5s ease-in-out, top 1.5s ease-in-out;
+  z-index: 5;
+}
+#poppetje.loopt { animation: hup 0.3s ease-in-out infinite; }
+@keyframes hup {
+  50% { transform: translate(-50%, -140%); }
+}
+
+.klein-knop {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ===== Eiland Regenboogsnaren ===== */
+#regenboog { background: linear-gradient(#fff6d8, #ffe3b0); }
+#regenboog .balk h2 { text-shadow: none; font-size: 2.5rem; }
+
+.terug-knop {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  font-size: 2rem;
+  background: #fff;
+  box-shadow: 0 5px 0 #d9b77a;
+}
+
+.voortgang { display: flex; gap: 10px; }
+.bol {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid #d9b77a;
+  transition: background 0.3s, transform 0.3s;
+}
+.bol.vol { background: #ffcc00; border-color: #e0a800; transform: scale(1.15); }
+
+.opdracht {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 2rem;
+  font-weight: bold;
+  padding: 6px;
+}
+.doel-stip {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.15);
+  animation: klop 1.2s ease-in-out infinite;
+}
+@keyframes klop { 50% { transform: scale(1.12); } }
+
+.luister-knop {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  font-size: 2.6rem;
+  background: #fff;
+  box-shadow: 0 5px 0 #d9b77a;
+}
+.luister-knop:active, .terug-knop:active { transform: translateY(4px); box-shadow: none; }
+
+/* De gitaarhals met snaren */
+.snaren {
+  flex: 1;
+  margin: 10px 16px 20px;
+  padding: 10px 0;
+  border-radius: 24px;
+  background: linear-gradient(90deg, #8b5a2b, #a86d38, #8b5a2b); /* hout */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+/* Eén snaar = een brede knop, met daarin de gekleurde balk */
+.snaar {
+  position: relative;
+  flex: 1;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+.snaar .lijn {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+}
+.snaar.trilt .lijn { animation: tril 0.08s linear 6; }
+@keyframes tril {
+  25% { transform: translateY(-4px); }
+  75% { transform: translateY(4px); }
+}
+.snaar.goed .lijn { outline: 6px solid #fff; }
+.snaar.fout { animation: nee 0.4s; }
+@keyframes nee {
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* ===== Feestje ===== */
+.feest {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.feest.verborgen { display: none; }
+.feest-ster {
+  font-size: 10rem;
+  animation: draai 1s ease-out;
+}
+@keyframes draai {
+  from { transform: scale(0) rotate(-360deg); }
+  to   { transform: scale(1) rotate(0); }
+}
+.feest p { font-size: 3rem; font-weight: bold; margin: 10px; }
+
+.grote-knop {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  font-size: 4rem;
+  color: #fff;
+  background: #4cc25a;
+  box-shadow: 0 8px 0 #2f8f3b;
+}
+.grote-knop:active { transform: translateY(6px); box-shadow: none; }
+
+/* Kleinere schermen (telefoon of tablet rechtop): eilanden iets kleiner */
+@media (max-width: 700px) {
+  .eiland { width: 130px; height: 130px; }
+  .eiland .plaatje { font-size: 3.3rem; }
+  .eiland .naam { font-size: 0.8rem; }
+}
