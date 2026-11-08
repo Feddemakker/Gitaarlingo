@@ -27,7 +27,13 @@ van 6 jaar (kleine gitaar) samen gitaar leren. Speelt op een tablet in de browse
   volgende eiland en dat eiland gaat open.
 - Eiland 1 "Regenboogsnaren": de 6 snaren als dikke gekleurde balken; tik erop
   en je hoort de toon (E2, A2, D3, G3, B3, E4 — standaardstemming).
-- Eiland 2 en 3 zijn nog niet ingevuld (komen later).
+- Eiland 2 "Palmritme": de gitaar tokkelt 2–4 keer (elke tokkel laat een
+  kokosnoot springen); daarna tokkel je zelf even vaak op de grote knop.
+- Eiland 3 "Akkoordkasteel": luister naar een akkoord en kies blij 😊 (E)
+  of verdrietig 😢 (Em). Bij fout hoor je hoe jouw keuze klinkt.
+- Alle eilanden gebruiken dezelfde regels in script.js (`startEiland`,
+  `opdrachtGoed`, `opdrachtFout`). Een nieuw eiland = nieuw scherm in
+  index.html + een "nieuwe opdracht"-functie in `EILAND_STARTERS`.
 
 ## Testen
 - Open `index.html` in een browser, of start een simpele server:

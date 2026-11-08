@@ -50,7 +50,7 @@
   <!-- ===== SCHERM 2: eiland Regenboogsnaren ===== -->
   <section id="regenboog" class="scherm">
     <header class="balk">
-      <button class="terug-knop" id="terug">⬅</button>
+      <button class="terug-knop">⬅</button>
       <h2>🌈</h2>
       <!-- Drie bolletjes: hoeveel opdrachtjes je al goed hebt -->
       <div class="voortgang">
@@ -67,6 +67,51 @@
 
     <!-- Hier zet script.js de 6 snaren neer -->
     <div id="snaren" class="snaren"></div>
+  </section>
+
+  <!-- ===== SCHERM 3: eiland Palmritme ===== -->
+  <section id="palm" class="scherm">
+    <header class="balk">
+      <button class="terug-knop">⬅</button>
+      <h2>🌴</h2>
+      <div class="voortgang">
+        <span class="bol"></span><span class="bol"></span><span class="bol"></span>
+      </div>
+    </header>
+
+    <!-- Luisterknop: speel het ritme nog een keer -->
+    <div class="opdracht">
+      <button id="palm-luister" class="luister-knop" title="Luister">👂</button>
+    </div>
+
+    <!-- Hier zet script.js de kokosnoten neer (1 kokosnoot = 1 tokkel) -->
+    <div id="kokosnoten" class="kokosnoten"></div>
+
+    <!-- De grote tokkelknop -->
+    <div class="midden">
+      <button id="tokkel" class="tokkel-knop">🎸</button>
+    </div>
+  </section>
+
+  <!-- ===== SCHERM 4: eiland Akkoordkasteel ===== -->
+  <section id="kasteel" class="scherm">
+    <header class="balk">
+      <button class="terug-knop">⬅</button>
+      <h2>🏰</h2>
+      <div class="voortgang">
+        <span class="bol"></span><span class="bol"></span><span class="bol"></span>
+      </div>
+    </header>
+
+    <div class="opdracht">
+      <button id="kasteel-luister" class="luister-knop" title="Luister">👂</button>
+    </div>
+
+    <!-- Twee keuzes: klinkt het akkoord blij of verdrietig? -->
+    <div class="keuzes">
+      <button class="keuze" data-soort="blij">😊<small>E</small></button>
+      <button class="keuze" data-soort="sip">😢<small>Em</small></button>
+    </div>
   </section>
 
   <!-- ===== Feestje als je een ster verdient ===== -->

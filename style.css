@@ -232,6 +232,79 @@ button {
   75% { transform: translateX(10px); }
 }
 
+/* ===== Eiland Palmritme ===== */
+#palm { background: linear-gradient(#e6ffd9, #bdf0a8); }
+#palm .balk h2, #kasteel .balk h2 { text-shadow: none; font-size: 2.5rem; }
+
+.kokosnoten {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  min-height: 120px;
+  padding: 10px;
+}
+.kokosnoot {
+  font-size: 5.5rem;
+  line-height: 1;
+  opacity: 0.25;                 /* dof = nog niet gespeeld */
+  transition: opacity 0.1s, transform 0.1s;
+}
+.kokosnoot.aan {
+  opacity: 1;
+  transform: scale(1.25) translateY(-10px); /* even omhoog springen */
+}
+.kokosnoten.fout { animation: nee 0.4s; }
+
+.midden {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tokkel-knop {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  font-size: 8rem;
+  background: #fff;
+  box-shadow: 0 12px 0 #6dbf55;
+  opacity: 0.6;                  /* even wachten: eerst luisteren */
+  transition: opacity 0.3s;
+}
+.tokkel-knop.jouw-beurt {      /* nu mag jij! */
+  opacity: 1;
+  animation: klop 1.2s ease-in-out infinite;
+}
+.tokkel-knop:active { transform: translateY(8px); box-shadow: 0 4px 0 #6dbf55; }
+
+/* ===== Eiland Akkoordkasteel ===== */
+#kasteel { background: linear-gradient(#f1e4ff, #d7bdf5); }
+
+.keuzes {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px;
+}
+.keuze {
+  width: 220px;
+  height: 260px;
+  border-radius: 40px;
+  font-size: 8rem;
+  background: #fff;
+  box-shadow: 0 12px 0 #a07cc8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.keuze small { font-size: 1.6rem; font-weight: bold; color: #7a5aa0; }
+.keuze:active { transform: translateY(8px); box-shadow: 0 4px 0 #a07cc8; }
+.keuze.goed { outline: 10px solid #4cc25a; }
+.keuze.fout { animation: nee 0.4s; }
+
 /* ===== Feestje ===== */
 .feest {
   position: fixed;
@@ -270,4 +343,7 @@ button {
   .eiland { width: 130px; height: 130px; }
   .eiland .plaatje { font-size: 3.3rem; }
   .eiland .naam { font-size: 0.8rem; }
+  .tokkel-knop { width: 180px; height: 180px; font-size: 6rem; }
+  .keuze { width: 150px; height: 190px; font-size: 5.5rem; }
+  .kokosnoot { font-size: 4rem; }
 }
