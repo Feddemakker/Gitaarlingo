@@ -8,12 +8,12 @@
 // Van dik (laag) naar dun (hoog), zoals in standaardstemming.
 // freq = hoe snel de snaar trilt (Hertz). Hoger getal = hogere toon.
 const SNAREN = [
-  { naam: "E", freq: 82.41,  kleur: "#e53935", dikte: 34 }, // rood
-  { naam: "A", freq: 110.00, kleur: "#fb8c00", dikte: 29 }, // oranje
-  { naam: "D", freq: 146.83, kleur: "#fdd835", dikte: 25 }, // geel
-  { naam: "G", freq: 196.00, kleur: "#43a047", dikte: 21 }, // groen
-  { naam: "B", freq: 246.94, kleur: "#1e88e5", dikte: 17 }, // blauw
-  { naam: "e", freq: 329.63, kleur: "#8e24aa", dikte: 14 }, // paars
+  { naam: "E", freq: 82.41,  kleur: "#ff1f4b", dikte: 34 }, // rood
+  { naam: "A", freq: 110.00, kleur: "#ff8a00", dikte: 29 }, // oranje
+  { naam: "D", freq: 146.83, kleur: "#ffd000", dikte: 25 }, // geel
+  { naam: "G", freq: 196.00, kleur: "#00c853", dikte: 21 }, // groen
+  { naam: "B", freq: 246.94, kleur: "#2979ff", dikte: 17 }, // blauw
+  { naam: "e", freq: 329.63, kleur: "#b620e0", dikte: 14 }, // paars
 ];
 
 // Alle snaren los (zonder vingers) samen = een vrolijke strum
@@ -270,7 +270,9 @@ let doelSnaar = null; // welke snaar moet je aantikken (0 t/m 5)
 SNAREN.forEach((snaar, nr) => {
   const knop = document.createElement("button");
   knop.className = "snaar";
-  knop.innerHTML = `<div class="lijn" style="height:${snaar.dikte}px; background:${snaar.kleur}"></div>`;
+  // De gekleurde balk, en een toetsplaatje (1 t/m 6) voor op de laptop
+  knop.innerHTML = `<kbd class="toets">${nr + 1}</kbd>` +
+    `<div class="lijn" style="height:${snaar.dikte}px; background:${snaar.kleur}"></div>`;
   // "pointerdown" reageert direct bij aanraken (sneller dan "click")
   knop.addEventListener("pointerdown", () => tikSnaar(nr, knop));
   snarenVak.appendChild(knop);
@@ -301,9 +303,6 @@ function tikSnaar(nr, knop) {
   }
 }
 
-document.getElementById("luister").addEventListener("click", () => {
-  speelToon(SNAREN[doelSnaar].freq);
-});
 
 
 // ---------- 8. Eiland 2: Palmritme ----------
@@ -381,7 +380,10 @@ function stopPalm() {
   clearTimeout(palmKlok);
 }
 
-tokkelKnop.addEventListener("pointerdown", () => {
+tokkelKnop.addEventListener("pointerdown", tokkel);
+
+// Eén keer tokkelen (met de vinger, de muis of de spatiebalk)
+function tokkel() {
   speelAkkoord(LOSSE_SNAREN);
   if (!palmBeurt || wachten) return;
 
@@ -395,7 +397,7 @@ tokkelKnop.addEventListener("pointerdown", () => {
   // Gaat hij af (1,3 s niks gedaan)? Dan kijken we of het klopt.
   clearTimeout(palmKlok);
   palmKlok = setTimeout(controleerPalm, 1300);
-});
+}
 
 function controleerPalm() {
   palmBeurt = false;
@@ -409,9 +411,6 @@ function controleerPalm() {
   }
 }
 
-document.getElementById("palm-luister").addEventListener("click", () => {
-  if (!wachten) speelPalmVoorbeeld();
-});
 
 
 // ---------- 9. Eiland 3: Akkoordkasteel ----------
@@ -424,24 +423,36 @@ function nieuweKasteelOpdracht() {
 }
 
 document.querySelectorAll(".keuze").forEach(knop => {
-  knop.addEventListener("click", () => {
-    if (wachten) return;
-    const gekozen = knop.dataset.soort; // "blij" of "sip"
-
-    if (gekozen === kasteelDoel) {
-      knop.classList.add("goed");
-      setTimeout(() => knop.classList.remove("goed"), 1300);
-      opdrachtGoed(nieuweKasteelOpdracht);
-    } else {
-      // Laat horen hoe jouw keuze klinkt, zodat je het verschil leert
-      speelAkkoord(AKKOORDEN[gekozen]);
-      opdrachtFout(knop);
-    }
-  });
+  knop.addEventListener("click", () => kiesAkkoord(knop));
 });
 
-document.getElementById("kasteel-luister").addEventListener("click", () => {
-  speelAkkoord(AKKOORDEN[kasteelDoel]);
+// Je kiest blij of sip (met de vinger, de muis of de pijltjestoetsen)
+function kiesAkkoord(knop) {
+  if (wachten) return;
+  const gekozen = knop.dataset.soort; // "blij" of "sip"
+
+  if (gekozen === kasteelDoel) {
+    knop.classList.add("goed");
+    setTimeout(() => knop.classList.remove("goed"), 1300);
+    opdrachtGoed(nieuweKasteelOpdracht);
+  } else {
+    // Laat horen hoe jouw keuze klinkt, zodat je het verschil leert
+    speelAkkoord(AKKOORDEN[gekozen]);
+    opdrachtFout(knop);
+  }
+}
+
+
+// ---------- Luisterknoppen (👂) ----------
+// Elk eiland heeft een 👂-knop. Wat je hoort, hangt af van het eiland.
+const LUISTEREN = [
+  () => speelToon(SNAREN[doelSnaar].freq),            // Regenboogsnaren: de toon
+  () => { if (!wachten) speelPalmVoorbeeld(); },      // Palmritme: het ritme
+  () => speelAkkoord(AKKOORDEN[kasteelDoel]),         // Akkoordkasteel: het akkoord
+];
+
+document.querySelectorAll(".luister-knop").forEach(knop => {
+  knop.addEventListener("click", () => LUISTEREN[huidigEiland]());
 });
 
 
@@ -486,5 +497,83 @@ document.getElementById("verder").addEventListener("click", () => {
 });
 
 
-// ---------- 11. Start! ----------
+// ---------- 11. Toetsenbord (voor op de laptop) ----------
+// Laat een knop er even "ingedrukt" uitzien, alsof je erop klikte
+function drukIn(knop) {
+  knop.classList.add("ingedrukt");
+  setTimeout(() => knop.classList.remove("ingedrukt"), 150);
+}
+
+// Welk scherm is nu zichtbaar? (bv. "kaart" of "palm")
+function actiefScherm() {
+  return document.querySelector(".scherm.actief").id;
+}
+
+// "keydown" = er wordt een toets ingedrukt. e.key zegt welke.
+document.addEventListener("keydown", (e) => {
+  if (e.repeat) return; // toets ingedrukt houden telt maar één keer
+  geluidsmachine();     // geluid "wakker maken"
+
+  // Zorg dat de browser niet óók nog iets doet met de toets
+  // (spatie zou anders de pagina laten scrollen).
+  if (document.activeElement) document.activeElement.blur();
+
+  const scherm = actiefScherm();
+  const toets = e.key;
+
+  // Feestje in beeld? Enter of spatie = verder
+  if (!document.getElementById("feest").classList.contains("verborgen")) {
+    if (toets === "Enter" || toets === " ") {
+      e.preventDefault();
+      const knop = document.getElementById("verder");
+      drukIn(knop);
+      knop.click();
+    }
+    return;
+  }
+
+  // Op de kaart: Enter = speel het eiland waar het poppetje staat
+  if (scherm === "kaart") {
+    if (toets === "Enter" || toets === " ") {
+      e.preventDefault();
+      startEiland(voortgang.open - 1);
+    }
+    return;
+  }
+
+  // Op elk eiland: Esc = terug, Enter = luisteren
+  const knopIn = (klasse) => document.querySelector(`#${scherm} .${klasse}`);
+  if (toets === "Escape") {
+    drukIn(knopIn("terug-knop"));
+    knopIn("terug-knop").click();
+    return;
+  }
+  if (toets === "Enter") {
+    e.preventDefault();
+    drukIn(knopIn("luister-knop"));
+    knopIn("luister-knop").click();
+    return;
+  }
+
+  // Toetsen die per eiland verschillen
+  if (scherm === "regenboog" && /^[1-6]$/.test(toets)) { // is het een cijfer 1 t/m 6?
+    const nr = Number(toets) - 1;             // toets "1" = snaar 0
+    tikSnaar(nr, snarenVak.children[nr]);
+  }
+  if (scherm === "palm" && toets === " ") {
+    e.preventDefault();
+    drukIn(tokkelKnop);
+    tokkel();
+  }
+  if (scherm === "kasteel" && (toets === "ArrowLeft" || toets === "ArrowRight")) {
+    e.preventDefault();
+    const knop = document.querySelector(toets === "ArrowLeft" ? '.keuze[data-soort="blij"]'
+                                                               : '.keuze[data-soort="sip"]');
+    drukIn(knop);
+    kiesAkkoord(knop);
+  }
+});
+
+
+// ---------- 12. Start! ----------
 tekenKaart();

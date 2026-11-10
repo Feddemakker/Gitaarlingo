@@ -1,3 +1,36 @@
+/* ===== Lettertype =====
+   Fredoka staat in de map "lettertype" van dit project zelf,
+   dus er wordt niets van internet geladen. */
+@font-face {
+  font-family: "Fredoka";
+  src: url("lettertype/fredoka-600.woff2") format("woff2");
+  font-weight: 600;
+}
+@font-face {
+  font-family: "Fredoka";
+  src: url("lettertype/fredoka-700.woff2") format("woff2");
+  font-weight: 700;
+}
+
+/* ===== Kleuren =====
+   Alle kleuren op één plek. Wil je een kleur veranderen? Doe het hier. */
+:root {
+  --rood:   #ff1f4b;
+  --oranje: #ff8a00;
+  --geel:   #ffd000;
+  --groen:  #00c853;
+  --blauw:  #2979ff;
+  --paars:  #b620e0;
+  --roze:   #ff3d9a;
+
+  --zee-licht: #00c6ff;
+  --zee-donker: #0057ff;
+  --zand: #ffd84d;
+  --gras: #2ee05f;
+  --hout: #7a3b10;
+  --tekst: #2b1600;
+}
+
 /* ===== Algemeen ===== */
 * {
   box-sizing: border-box;
@@ -8,17 +41,19 @@
 html, body {
   margin: 0;
   height: 100%;
-  font-family: "Comic Sans MS", "Chalkboard SE", "Trebuchet MS", sans-serif;
-  color: #3b2a1a;
+  font-family: "Fredoka", "Comic Sans MS", "Chalkboard SE", sans-serif;
+  font-weight: 600;
+  color: var(--tekst);
   overflow: hidden;
 }
 
 body {
-  background: linear-gradient(#8fd3ff, #4fb3f0); /* blauwe lucht/zee */
+  background: linear-gradient(var(--zee-licht), var(--zee-donker)); /* felblauwe zee */
 }
 
 button {
   font-family: inherit;
+  font-weight: 700;
   cursor: pointer;
   border: none;
 }
@@ -38,18 +73,56 @@ button {
   justify-content: space-between;
   padding: 12px 20px;
 }
-.balk h1, .balk h2 {
+.balk h2 {
   margin: 0;
-  font-size: 2rem;
-  color: #fff;
-  text-shadow: 2px 2px 0 #2a7fb8;
+  font-size: 3rem;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.25));
 }
+
+/* De titel: elke letter een andere kleur, en ze huppelen om de beurt */
+.titel {
+  margin: 0;
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.titel span {
+  display: inline-block;
+  -webkit-text-stroke: 2px #fff;          /* wit randje om elke letter */
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  animation: letterhup 2.4s ease-in-out infinite;
+}
+.titel span:nth-child(6n+1) { color: var(--rood); }
+.titel span:nth-child(6n+2) { color: var(--oranje); }
+.titel span:nth-child(6n+3) { color: var(--geel); }
+.titel span:nth-child(6n+4) { color: var(--groen); }
+.titel span:nth-child(6n+5) { color: var(--paars); }
+.titel span:nth-child(6n)   { color: var(--roze); }
+/* elke letter begint een tikje later, zo ontstaat een golfje */
+.titel span:nth-child(2)  { animation-delay: 0.1s; }
+.titel span:nth-child(3)  { animation-delay: 0.2s; }
+.titel span:nth-child(4)  { animation-delay: 0.3s; }
+.titel span:nth-child(5)  { animation-delay: 0.4s; }
+.titel span:nth-child(6)  { animation-delay: 0.5s; }
+.titel span:nth-child(7)  { animation-delay: 0.6s; }
+.titel span:nth-child(8)  { animation-delay: 0.7s; }
+.titel span:nth-child(9)  { animation-delay: 0.8s; }
+.titel span:nth-child(10) { animation-delay: 0.9s; }
+.titel span:nth-child(11) { animation-delay: 1.0s; }
+.titel span:nth-child(12) { animation-delay: 1.1s; }
+@keyframes letterhup {
+  0%, 30%, 100% { transform: translateY(0); }
+  15%           { transform: translateY(-8px); }
+}
+
 .sterren {
-  background: #fff;
+  background: var(--geel);
+  border: 4px solid #fff;
   border-radius: 30px;
-  padding: 8px 20px;
-  font-size: 1.8rem;
-  font-weight: bold;
+  padding: 6px 22px;
+  font-size: 2rem;
+  font-weight: 700;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.25);
 }
 
 /* ===== De kaart ===== */
@@ -68,29 +141,29 @@ button {
 .eiland {
   position: absolute;
   transform: translate(-50%, -50%); /* midden van het eiland op het punt zetten */
-  width: 170px;
-  height: 170px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 40%, #ffe9a8 55%, #7ccf6b 56%);
-  box-shadow: 0 10px 0 #2f8fcf, 0 0 0 8px rgba(255, 255, 255, 0.5);
+  background: radial-gradient(circle at 50% 40%, var(--zand) 55%, var(--gras) 56%);
+  box-shadow: 0 12px 0 #003cb3, 0 0 0 9px rgba(255, 255, 255, 0.6);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   transition: transform 0.2s;
 }
-.eiland .plaatje { font-size: 4.5rem; line-height: 1; }
+.eiland .plaatje { font-size: 4.8rem; line-height: 1; }
 .eiland .naam {
-  font-size: 0.95rem;
-  font-weight: bold;
-  max-width: 130px;
+  font-size: 1rem;
+  max-width: 140px;
   text-align: center;
+  line-height: 1.1;
 }
 .eiland:active { transform: translate(-50%, -50%) scale(0.92); }
 
 /* Dicht eiland: grijs met een slotje */
 .eiland.dicht {
-  filter: grayscale(1) brightness(0.85);
+  filter: grayscale(1) brightness(0.8);
   cursor: default;
 }
 .eiland.dicht::after {
@@ -104,15 +177,15 @@ button {
 /* Open eiland wiebelt een beetje: "tik mij!" */
 .eiland.open:not(.klaar) { animation: wiebel 1.6s ease-in-out infinite; }
 @keyframes wiebel {
-  0%, 100% { transform: translate(-50%, -50%) rotate(-3deg); }
-  50%      { transform: translate(-50%, -50%) rotate(3deg) scale(1.05); }
+  0%, 100% { transform: translate(-50%, -50%) rotate(-4deg); }
+  50%      { transform: translate(-50%, -50%) rotate(4deg) scale(1.06); }
 }
 
 /* Klaar eiland krijgt een ster */
 .eiland.klaar::after {
   content: "⭐";
   position: absolute;
-  font-size: 2.6rem;
+  font-size: 2.8rem;
   right: 6px;
   top: 0;
 }
@@ -134,73 +207,84 @@ button {
   position: absolute;
   right: 16px;
   bottom: 16px;
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  font-size: 1.6rem;
-  background: rgba(255, 255, 255, 0.6);
+  font-size: 1.7rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.25);
 }
 
-/* ===== Eiland Regenboogsnaren ===== */
-#regenboog { background: linear-gradient(#fff6d8, #ffe3b0); }
-#regenboog .balk h2 { text-shadow: none; font-size: 2.5rem; }
-
+/* ===== Knoppen die op elk eiland terugkomen ===== */
 .terug-knop {
-  width: 70px;
-  height: 70px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  font-size: 2rem;
-  background: #fff;
-  box-shadow: 0 5px 0 #d9b77a;
+  font-size: 2.2rem;
+  color: #fff;
+  background: var(--rood);
+  border: 4px solid #fff;
+  box-shadow: 0 6px 0 #a3002a;
+}
+.luister-knop {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  font-size: 2.8rem;
+  background: var(--geel);
+  border: 4px solid #fff;
+  box-shadow: 0 6px 0 #b38f00;
+}
+/* :active = muis/vinger drukt erop. .ingedrukt = toets op het toetsenbord */
+.terug-knop:active, .terug-knop.ingedrukt,
+.luister-knop:active, .luister-knop.ingedrukt {
+  transform: translateY(5px);
+  box-shadow: none;
 }
 
 .voortgang { display: flex; gap: 10px; }
 .bol {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #fff;
-  border: 4px solid #d9b77a;
+  background: rgba(255, 255, 255, 0.5);
+  border: 4px solid #fff;
   transition: background 0.3s, transform 0.3s;
 }
-.bol.vol { background: #ffcc00; border-color: #e0a800; transform: scale(1.15); }
+.bol.vol { background: var(--geel); transform: scale(1.2); box-shadow: 0 0 12px var(--geel); }
 
 .opdracht {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 2.2rem;
+  color: #fff;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
   padding: 6px;
 }
-.doel-stip {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: 5px solid #fff;
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.15);
-  animation: klop 1.2s ease-in-out infinite;
-}
-@keyframes klop { 50% { transform: scale(1.12); } }
 
-.luister-knop {
+/* ===== Eiland Regenboogsnaren ===== */
+#regenboog { background: linear-gradient(135deg, var(--roze), var(--oranje)); }
+
+.doel-stip {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  font-size: 2.6rem;
-  background: #fff;
-  box-shadow: 0 5px 0 #d9b77a;
+  border: 6px solid #fff;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+  animation: klop 1.2s ease-in-out infinite;
 }
-.luister-knop:active, .terug-knop:active { transform: translateY(4px); box-shadow: none; }
+@keyframes klop { 50% { transform: scale(1.12); } }
 
 /* De gitaarhals met snaren */
 .snaren {
   flex: 1;
   margin: 10px 16px 20px;
   padding: 10px 0;
-  border-radius: 24px;
-  background: linear-gradient(90deg, #8b5a2b, #a86d38, #8b5a2b); /* hout */
+  border-radius: 28px;
+  border: 6px solid #fff;
+  background: linear-gradient(90deg, #5c2a08, var(--hout), #5c2a08); /* hout */
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -213,12 +297,13 @@ button {
   background: transparent;
   display: flex;
   align-items: center;
+  gap: 16px;
   padding: 0 20px;
 }
 .snaar .lijn {
-  width: 100%;
+  flex: 1;
   border-radius: 20px;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.35);
 }
 .snaar.trilt .lijn { animation: tril 0.08s linear 6; }
 @keyframes tril {
@@ -233,8 +318,7 @@ button {
 }
 
 /* ===== Eiland Palmritme ===== */
-#palm { background: linear-gradient(#e6ffd9, #bdf0a8); }
-#palm .balk h2, #kasteel .balk h2 { text-shadow: none; font-size: 2.5rem; }
+#palm { background: linear-gradient(135deg, #00e070, #009e9e); }
 
 .kokosnoten {
   display: flex;
@@ -246,12 +330,13 @@ button {
 .kokosnoot {
   font-size: 5.5rem;
   line-height: 1;
-  opacity: 0.25;                 /* dof = nog niet gespeeld */
+  opacity: 0.45;                 /* dof = nog niet gespeeld */
   transition: opacity 0.1s, transform 0.1s;
 }
 .kokosnoot.aan {
   opacity: 1;
   transform: scale(1.25) translateY(-10px); /* even omhoog springen */
+  filter: drop-shadow(0 0 14px var(--geel));
 }
 .kokosnoten.fout { animation: nee 0.4s; }
 
@@ -262,54 +347,61 @@ button {
   justify-content: center;
 }
 .tokkel-knop {
-  width: 240px;
-  height: 240px;
+  position: relative;
+  width: 250px;
+  height: 250px;
   border-radius: 50%;
   font-size: 8rem;
-  background: #fff;
-  box-shadow: 0 12px 0 #6dbf55;
-  opacity: 0.6;                  /* even wachten: eerst luisteren */
-  transition: opacity 0.3s;
+  background: #fff;              /* wit = even wachten: eerst luisteren */
+  border: 8px solid #fff;
+  box-shadow: 0 14px 0 #00806b;
+  transition: background 0.3s;
 }
-.tokkel-knop.jouw-beurt {      /* nu mag jij! */
-  opacity: 1;
+.tokkel-knop.jouw-beurt {      /* oranje en kloppen = nu mag jij! */
+  background: var(--oranje);
+  box-shadow: 0 14px 0 #b35f00;
   animation: klop 1.2s ease-in-out infinite;
 }
-.tokkel-knop:active { transform: translateY(8px); box-shadow: 0 4px 0 #6dbf55; }
+.tokkel-knop:active, .tokkel-knop.ingedrukt {
+  transform: translateY(8px);
+  box-shadow: 0 6px 0 #b35f00;
+}
 
 /* ===== Eiland Akkoordkasteel ===== */
-#kasteel { background: linear-gradient(#f1e4ff, #d7bdf5); }
+#kasteel { background: linear-gradient(135deg, var(--paars), #4a1ddb); }
 
 .keuzes {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 50px;
   padding: 20px;
 }
 .keuze {
-  width: 220px;
-  height: 260px;
+  position: relative;
+  width: 230px;
+  height: 270px;
   border-radius: 40px;
   font-size: 8rem;
-  background: #fff;
-  box-shadow: 0 12px 0 #a07cc8;
+  border: 8px solid #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.keuze small { font-size: 1.6rem; font-weight: bold; color: #7a5aa0; }
-.keuze:active { transform: translateY(8px); box-shadow: 0 4px 0 #a07cc8; }
-.keuze.goed { outline: 10px solid #4cc25a; }
+.keuze[data-soort="blij"] { background: var(--geel);  box-shadow: 0 14px 0 #b38f00; }
+.keuze[data-soort="sip"]  { background: #29b6f6;      box-shadow: 0 14px 0 #0277bd; }
+.keuze small { font-size: 1.8rem; color: var(--tekst); }
+.keuze:active, .keuze.ingedrukt { transform: translateY(8px); box-shadow: none; }
+.keuze.goed { outline: 10px solid var(--groen); }
 .keuze.fout { animation: nee 0.4s; }
 
 /* ===== Feestje ===== */
 .feest {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.85);
+  background: radial-gradient(circle, rgba(255, 238, 120, 0.95), rgba(255, 61, 154, 0.92));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -320,29 +412,84 @@ button {
 .feest-ster {
   font-size: 10rem;
   animation: draai 1s ease-out;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.2));
 }
 @keyframes draai {
   from { transform: scale(0) rotate(-360deg); }
   to   { transform: scale(1) rotate(0); }
 }
-.feest p { font-size: 3rem; font-weight: bold; margin: 10px; }
+.feest p {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 10px 0 24px;
+  color: #fff;
+  -webkit-text-stroke: 2px var(--paars);
+  text-shadow: 0 5px 0 rgba(0, 0, 0, 0.25);
+}
 
 .grote-knop {
-  width: 130px;
-  height: 130px;
+  position: relative;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  font-size: 4rem;
+  font-size: 4.5rem;
   color: #fff;
-  background: #4cc25a;
-  box-shadow: 0 8px 0 #2f8f3b;
+  background: var(--groen);
+  border: 6px solid #fff;
+  box-shadow: 0 9px 0 #00802f;
 }
-.grote-knop:active { transform: translateY(6px); box-shadow: none; }
+.grote-knop:active, .grote-knop.ingedrukt { transform: translateY(6px); box-shadow: none; }
 
-/* Kleinere schermen (telefoon of tablet rechtop): eilanden iets kleiner */
+/* ===== Toetsplaatjes (alleen op een laptop/computer) =====
+   Kleine "toetsjes" die laten zien welke toets je kunt indrukken.
+   Op een tablet (geen muis) zijn ze onzichtbaar. */
+.toets {
+  display: none;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tekst);
+  background: #fff;
+  border: 2px solid #ccc;
+  border-bottom-width: 5px;
+  border-radius: 8px;
+  padding: 2px 9px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+/* De toetsjes op ronde knoppen hangen onder de knop */
+.luister-knop .toets, .terug-knop .toets,
+.tokkel-knop .toets, .grote-knop .toets, .keuze .toets {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+}
+.luister-knop, .terug-knop { position: relative; }
+.snaar .toets { font-size: 1.3rem; min-width: 38px; text-align: center; }
+
+/* "hover: hover" en "pointer: fine" = er is een muis of touchpad */
+@media (hover: hover) and (pointer: fine) {
+  .toets { display: inline-block; }
+}
+
+/* ===== Grote laptop- of computerschermen: alles een maatje groter ===== */
+@media (min-width: 1300px) and (min-height: 750px) {
+  .eiland { width: 220px; height: 220px; }
+  .eiland .plaatje { font-size: 6rem; }
+  .eiland .naam { font-size: 1.2rem; max-width: 170px; }
+  .titel { font-size: 3.2rem; }
+  .keuze { width: 280px; height: 320px; font-size: 10rem; }
+  .tokkel-knop { width: 300px; height: 300px; font-size: 10rem; }
+  .kokosnoot { font-size: 7rem; }
+}
+
+/* ===== Kleinere schermen (telefoon of tablet rechtop) ===== */
 @media (max-width: 700px) {
   .eiland { width: 130px; height: 130px; }
   .eiland .plaatje { font-size: 3.3rem; }
   .eiland .naam { font-size: 0.8rem; }
+  .titel { font-size: 1.8rem; }
   .tokkel-knop { width: 180px; height: 180px; font-size: 6rem; }
   .keuze { width: 150px; height: 190px; font-size: 5.5rem; }
   .kokosnoot { font-size: 4rem; }

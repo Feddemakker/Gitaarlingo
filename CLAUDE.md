@@ -16,6 +16,15 @@ van 6 jaar (kleine gitaar) samen gitaar leren. Speelt op een tablet in de browse
 - Voortgang wordt alleen lokaal bewaard (localStorage op het apparaat zelf).
 - Code met duidelijke Nederlandse uitleg-commentaar, zodat de beginner het kan volgen.
 
+- Lettertype Fredoka staat lokaal in `lettertype/` (Open Font License).
+- Kleuren staan als variabelen bovenaan `style.css` (`:root`).
+
+## Laptop en toetsenbord
+- Eerst testen op de laptop; de tablet blijft ook werken.
+- Toetsen: Enter = spelen/luisteren/verder, Esc = terug,
+  1–6 = snaren, spatie = tokkelen, ← → = blij/sip.
+- Toetsplaatjes (`<kbd class="toets">`) zijn alleen zichtbaar als er een muis is.
+
 ## Ontwerpregels
 - Kindvriendelijk: grote knoppen, felle vrolijke kleuren, weinig tekst.
 - Werkt met aanraken (tablet) en ook met muis.

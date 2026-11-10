@@ -12,7 +12,8 @@
   <!-- ===== SCHERM 1: de kaart met het kronkelpad ===== -->
   <section id="kaart" class="scherm actief">
     <header class="balk">
-      <h1>🎸 Gitaarlingo</h1>
+      <!-- Elke letter in een eigen <span>, zo krijgt elke letter een eigen kleur -->
+      <h1 class="titel">🎸 <span>G</span><span>i</span><span>t</span><span>a</span><span>a</span><span>r</span><span>l</span><span>i</span><span>n</span><span>g</span><span>o</span></h1>
       <div class="sterren">⭐ <span id="aantal-sterren">0</span></div>
     </header>
 
@@ -20,7 +21,7 @@
       <!-- Het kronkelpad, getekend als SVG-lijn -->
       <svg class="pad" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path d="M 20 82 C 45 82, 70 75, 72 58 S 30 40, 30 26 S 60 12, 80 16"
-              fill="none" stroke="#f3d9a4" stroke-width="5" stroke-linecap="round"/>
+              fill="none" stroke="#ffb300" stroke-width="5" stroke-linecap="round"/>
         <path d="M 20 82 C 45 82, 70 75, 72 58 S 30 40, 30 26 S 60 12, 80 16"
               fill="none" stroke="#fff" stroke-width="1" stroke-dasharray="2 3"
               stroke-linecap="round"/>
@@ -50,7 +51,7 @@
   <!-- ===== SCHERM 2: eiland Regenboogsnaren ===== -->
   <section id="regenboog" class="scherm">
     <header class="balk">
-      <button class="terug-knop">⬅</button>
+      <button class="terug-knop">⬅<kbd class="toets">Esc</kbd></button>
       <h2>🌈</h2>
       <!-- Drie bolletjes: hoeveel opdrachtjes je al goed hebt -->
       <div class="voortgang">
@@ -62,7 +63,7 @@
     <div class="opdracht">
       <span>Tik op</span>
       <span id="doel-stip" class="doel-stip"></span>
-      <button id="luister" class="luister-knop" title="Luister">👂</button>
+      <button class="luister-knop" title="Luister">👂<kbd class="toets">Enter</kbd></button>
     </div>
 
     <!-- Hier zet script.js de 6 snaren neer -->
@@ -72,7 +73,7 @@
   <!-- ===== SCHERM 3: eiland Palmritme ===== -->
   <section id="palm" class="scherm">
     <header class="balk">
-      <button class="terug-knop">⬅</button>
+      <button class="terug-knop">⬅<kbd class="toets">Esc</kbd></button>
       <h2>🌴</h2>
       <div class="voortgang">
         <span class="bol"></span><span class="bol"></span><span class="bol"></span>
@@ -81,7 +82,7 @@
 
     <!-- Luisterknop: speel het ritme nog een keer -->
     <div class="opdracht">
-      <button id="palm-luister" class="luister-knop" title="Luister">👂</button>
+      <button class="luister-knop" title="Luister">👂<kbd class="toets">Enter</kbd></button>
     </div>
 
     <!-- Hier zet script.js de kokosnoten neer (1 kokosnoot = 1 tokkel) -->
@@ -89,14 +90,14 @@
 
     <!-- De grote tokkelknop -->
     <div class="midden">
-      <button id="tokkel" class="tokkel-knop">🎸</button>
+      <button id="tokkel" class="tokkel-knop">🎸<kbd class="toets">spatie</kbd></button>
     </div>
   </section>
 
   <!-- ===== SCHERM 4: eiland Akkoordkasteel ===== -->
   <section id="kasteel" class="scherm">
     <header class="balk">
-      <button class="terug-knop">⬅</button>
+      <button class="terug-knop">⬅<kbd class="toets">Esc</kbd></button>
       <h2>🏰</h2>
       <div class="voortgang">
         <span class="bol"></span><span class="bol"></span><span class="bol"></span>
@@ -104,13 +105,13 @@
     </header>
 
     <div class="opdracht">
-      <button id="kasteel-luister" class="luister-knop" title="Luister">👂</button>
+      <button class="luister-knop" title="Luister">👂<kbd class="toets">Enter</kbd></button>
     </div>
 
     <!-- Twee keuzes: klinkt het akkoord blij of verdrietig? -->
     <div class="keuzes">
-      <button class="keuze" data-soort="blij">😊<small>E</small></button>
-      <button class="keuze" data-soort="sip">😢<small>Em</small></button>
+      <button class="keuze" data-soort="blij">😊<small>E</small><kbd class="toets">←</kbd></button>
+      <button class="keuze" data-soort="sip">😢<small>Em</small><kbd class="toets">→</kbd></button>
     </div>
   </section>
 
@@ -118,7 +119,7 @@
   <div id="feest" class="feest verborgen">
     <div class="feest-ster">⭐</div>
     <p>Super!</p>
-    <button id="verder" class="grote-knop">➜</button>
+    <button id="verder" class="grote-knop">➜<kbd class="toets">Enter</kbd></button>
   </div>
 
   <script src="script.js"></script>
