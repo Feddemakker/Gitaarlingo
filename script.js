@@ -7,13 +7,21 @@
 // ---------- 1. De zes snaren ----------
 // Van dik (laag) naar dun (hoog), zoals in standaardstemming.
 // freq = hoe snel de snaar trilt (Hertz). Hoger getal = hogere toon.
+// kleurnaam en plek gebruikt de "leraar-stem" om de snaar aan te wijzen.
+// Houd je de gitaar gewoon vast, dan zit de dikste snaar het dichtst bij je gezicht.
 const SNAREN = [
-  { naam: "E", freq: 82.41,  kleur: "#ff1f4b", dikte: 34 }, // rood
-  { naam: "A", freq: 110.00, kleur: "#ff8a00", dikte: 29 }, // oranje
-  { naam: "D", freq: 146.83, kleur: "#ffd000", dikte: 25 }, // geel
-  { naam: "G", freq: 196.00, kleur: "#00c853", dikte: 21 }, // groen
-  { naam: "B", freq: 246.94, kleur: "#2979ff", dikte: 17 }, // blauw
-  { naam: "e", freq: 329.63, kleur: "#b620e0", dikte: 14 }, // paars
+  { naam: "E", freq: 82.41,  kleur: "#ff1f4b", dikte: 34, kleurnaam: "rode",   plek: "de dikste" },
+  { naam: "A", freq: 110.00, kleur: "#ff8a00", dikte: 29, kleurnaam: "oranje", plek: "de tweede" },
+  { naam: "D", freq: 146.83, kleur: "#ffd000", dikte: 25, kleurnaam: "gele",   plek: "de derde" },
+  { naam: "G", freq: 196.00, kleur: "#00c853", dikte: 21, kleurnaam: "groene", plek: "de vierde" },
+  { naam: "B", freq: 246.94, kleur: "#2979ff", dikte: 17, kleurnaam: "blauwe", plek: "de vijfde" },
+  { naam: "e", freq: 329.63, kleur: "#b620e0", dikte: 14, kleurnaam: "paarse", plek: "de dunste" },
+];
+
+// De twee spelers met hun eigen gitaar. Ze spelen om de beurt.
+const SPELERS = [
+  { emoji: "🧑", naam: "Grote gitaar" },
+  { emoji: "👧", naam: "Kleine gitaar" },
 ];
 
 // Alle snaren los (zonder vingers) samen = een vrolijke strum
@@ -27,16 +35,30 @@ const AKKOORDEN = {
   sip:  [82.41, 123.47, 164.81, 196.00, 246.94, 329.63], // Em
 };
 
-// Elk eiland hoort bij een scherm (de id in index.html)
-const EILAND_SCHERMEN = ["regenboog", "palm", "kasteel"];
-const OPDRACHTEN_PER_STER = 3;
+// Alle eilanden op een rij. Per eiland:
+//  scherm     = de id van het scherm in index.html (null = komt nog)
+//  start      = wat er gebeurt als je het eiland opent
+//  luister    = wat de 🔊-knop laat horen
+//  opdrachten = hoeveel opdrachtjes goed voor een ster
+const EILANDEN = [
+  { scherm: "stemhut",   start: () => startStemhut(),
+    luister: () => speelToon(SNAREN[stemSnaar].freq) },
+  { scherm: "regenboog", start: () => startRegenboog(), opdrachten: 4,
+    luister: () => speelToon(SNAREN[doelSnaar].freq) },
+  { scherm: "palm",      start: () => nieuwePalmOpdracht(), opdrachten: 3,
+    luister: () => { if (!wachten) speelPalmVoorbeeld(); } },
+  { scherm: "kasteel",   start: () => nieuweKasteelOpdracht(), opdrachten: 3,
+    luister: () => speelAkkoord(AKKOORDEN[kasteelDoel]) },
+  { scherm: null }, // 🎵 Liedjesstrand: bouwen we later
+];
 
 
 // ---------- 2. Voortgang onthouden ----------
 // We bewaren alleen op dit apparaat (localStorage). Niets gaat naar internet.
 function laadVoortgang() {
   try {
-    const opgeslagen = JSON.parse(localStorage.getItem("gitaarlingo"));
+    // "-v2": het nieuwe pad met 5 eilanden begint met een schone lei
+    const opgeslagen = JSON.parse(localStorage.getItem("gitaarlingo-v2"));
     if (opgeslagen) return opgeslagen;
   } catch (e) { /* lukt het niet, dan beginnen we gewoon opnieuw */ }
   return { open: 1, klaar: [] }; // open = hoeveel eilanden open zijn
@@ -44,7 +66,7 @@ function laadVoortgang() {
 
 function bewaarVoortgang() {
   try {
-    localStorage.setItem("gitaarlingo", JSON.stringify(voortgang));
+    localStorage.setItem("gitaarlingo-v2", JSON.stringify(voortgang));
   } catch (e) { /* geen ramp: dan onthouden we het alleen nu even */ }
 }
 
@@ -67,6 +89,7 @@ function geluidsmachine() {
 function speelToon(freq, duur = 2.0, sterkte = 0.5) {
   const ctx = geluidsmachine();
   const nu = ctx.currentTime;
+  stilVoor(duur * 1000); // de microfoon mag de app zelf niet horen
 
   // Volumeknop die we laten wegsterven
   const volume = ctx.createGain();
@@ -109,6 +132,7 @@ function speelJippie() {
 function speelBoing() {
   const ctx = geluidsmachine();
   const nu = ctx.currentTime;
+  stilVoor(500);
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
   osc.type = "sine";
@@ -119,6 +143,28 @@ function speelBoing() {
   osc.connect(g).connect(ctx.destination);
   osc.start(nu);
   osc.stop(nu + 0.4);
+}
+
+
+// ---------- 3b. De leraar praat ----------
+// De browser heeft een ingebouwde voorleesstem. We kiezen een Nederlandse.
+function zeg(tekst) {
+  if (!window.speechSynthesis) return; // deze browser kan niet praten
+  speechSynthesis.cancel();            // stop wat er nog gezegd werd
+  const zin = new SpeechSynthesisUtterance(tekst);
+  zin.lang = "nl-NL";
+  // Liefst een Nederlandse stem die óp de computer zelf werkt (localService),
+  // zodat er geen tekst naar internet gaat.
+  const stemmen = speechSynthesis.getVoices().filter(s => s.lang.toLowerCase().startsWith("nl"));
+  const stem = stemmen.find(s => s.localService) || stemmen[0];
+  if (stem) zin.voice = stem;
+  zin.rate = 0.95;  // iets rustiger praten
+  zin.pitch = 1.1;  // iets vrolijker
+  speechSynthesis.speak(zin);
+}
+
+function stopPraten() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
 }
 
 
@@ -207,27 +253,55 @@ let huidigEiland = null; // op welk eiland ben je nu (0, 1 of 2)
 let goed = 0;            // hoeveel opdrachtjes al goed
 let wachten = false;     // even niet tikken tijdens het "goed!"-moment
 
-// Elk eiland heeft een eigen "eerste opdracht"-functie (staan verderop)
-const EILAND_STARTERS = [
-  () => nieuweRegenboogOpdracht(),
-  () => nieuwePalmOpdracht(),
-  () => nieuweKasteelOpdracht(),
-];
-
 function startEiland(nr) {
+  const eiland = EILANDEN[nr];
+  if (!eiland.scherm) {          // dit eiland bestaat nog niet
+    toonMelding("🚧 Binnenkort!");
+    return;
+  }
   huidigEiland = nr;
   goed = 0;
   wachten = false;
-  toonScherm(EILAND_SCHERMEN[nr]);
+  toonScherm(eiland.scherm);
   tekenBollen();
-  EILAND_STARTERS[nr]();
+  eiland.start();
 }
 
-// De 3 bolletjes bovenin het scherm van het huidige eiland bijwerken
+// De bolletjes bovenin het scherm van het huidige eiland bijwerken
 function tekenBollen() {
-  const bollen = document.querySelectorAll(`#${EILAND_SCHERMEN[huidigEiland]} .bol`);
-  bollen.forEach((bol, i) => bol.classList.toggle("vol", i < goed));
+  const eiland = EILANDEN[huidigEiland];
+  const vak = document.querySelector(`#${eiland.scherm} .voortgang`);
+  if (!vak) return; // dit eiland heeft geen bolletjes
+
+  // Nog niet genoeg bolletjes? Maak ze aan.
+  if (vak.children.length !== eiland.opdrachten) {
+    vak.innerHTML = "";
+    for (let i = 0; i < eiland.opdrachten; i++) {
+      const bol = document.createElement("span");
+      bol.className = "bol";
+      vak.appendChild(bol);
+    }
+  }
+  [...vak.children].forEach((bol, i) => bol.classList.toggle("vol", i < goed));
 }
+
+// Laat zien wie er aan de beurt is (in het huidige scherm)
+function toonBeurt(speler) {
+  const vak = document.querySelector(`#${EILANDEN[huidigEiland].scherm} .beurt`);
+  vak.textContent = `${SPELERS[speler].emoji} ${SPELERS[speler].naam}`;
+}
+
+// Zet de microfoon aan. Lukt dat niet, dan zie je uitleg hoe je het oplost.
+async function zetMicrofoonAan() {
+  const gelukt = await startMicrofoon();
+  if (!gelukt) document.getElementById("mic-fout").classList.remove("verborgen");
+  return gelukt;
+}
+
+document.getElementById("mic-terug").addEventListener("click", () => {
+  document.getElementById("mic-fout").classList.add("verborgen");
+  gaTerugNaarKaart();
+});
 
 // Een opdrachtje is goed! Daarna: volgende opdracht, of een ster.
 function opdrachtGoed(volgendeOpdracht) {
@@ -237,7 +311,7 @@ function opdrachtGoed(volgendeOpdracht) {
   setTimeout(speelJippie, 400);
   setTimeout(() => {
     wachten = false;
-    if (goed >= OPDRACHTEN_PER_STER) {
+    if (goed >= EILANDEN[huidigEiland].opdrachten) {
       verdienSter(huidigEiland);
     } else {
       volgendeOpdracht();
@@ -252,31 +326,223 @@ function opdrachtFout(element) {
 }
 
 // Alle terug-knoppen: stop wat er nog speelt en ga naar de kaart
+function gaTerugNaarKaart() {
+  stopPalm();
+  stopPraten();
+  luisterNaar(null); // de microfoon hoeft niet meer te luisteren
+  toonScherm("kaart");
+}
+
 document.querySelectorAll(".terug-knop").forEach(knop => {
-  knop.addEventListener("click", () => {
-    stopPalm();
-    toonScherm("kaart");
-  });
+  knop.addEventListener("click", gaTerugNaarKaart);
 });
 
 
-// ---------- 7. Eiland 1: Regenboogsnaren ----------
-// Tik op de snaar met dezelfde kleur als de stip.
+// ---------- 7. Hulpjes voor het luisteren naar de echte gitaar ----------
+// Hoeveel "centen" zit toon a naast toon b? 100 centen = 1 halve toon.
+function centen(a, b) {
+  return 1200 * Math.log2(a / b);
+}
+
+// Welke losse snaar is dit? Geeft 0 t/m 5 terug, of null als het geen snaar is.
+function welkeSnaar(freq) {
+  let beste = null;
+  let kleinsteAfstand = 200; // verder dan 2 halve tonen weg = geen snaar
+  SNAREN.forEach((snaar, nr) => {
+    const afstand = Math.abs(centen(freq, snaar.freq));
+    if (afstand < kleinsteAfstand) {
+      kleinsteAfstand = afstand;
+      beste = nr;
+    }
+  });
+  return beste;
+}
+
+// Het middelste getal uit een rijtje (handig: één rare meting telt dan niet)
+function mediaan(rij) {
+  const gesorteerd = [...rij].sort((a, b) => a - b);
+  return gesorteerd[Math.floor(gesorteerd.length / 2)];
+}
+
+
+// ---------- 8. Eiland 1: Stemhut ----------
+// Stem eerst de grote, dan de kleine gitaar. Snaar voor snaar.
+const stemSnarenVak = document.getElementById("stem-snaren");
+const naald = document.getElementById("naald");
+const stemHint = document.getElementById("stem-hint");
+const gitaarBadges = document.querySelectorAll(".gitaar-badge");
+
+let stemGitaar = 0;      // 0 = grote gitaar, 1 = kleine gitaar
+let stemSnaar = 0;       // welke snaar stemmen we nu (0 t/m 5)
+let stemGoedTeller = 0;  // hoe lang klinkt de snaar al goed?
+let stemMetingen = [];   // de laatste paar metingen
+let laatsteTip = 0;      // wanneer zei de leraar voor het laatst een tip?
+let gestemd = [];        // welke snaren zijn klaar (true/false)
+
+const ZUIVER = 7;        // binnen 7 centen = goed gestemd
+const VASTHOUDEN = 12;   // zo vaak achter elkaar goed (±0,6 seconde)
+
+// Maak de 6 rondjes één keer aan. Tik erop = die snaar stemmen.
+SNAREN.forEach((snaar, nr) => {
+  const knop = document.createElement("button");
+  knop.className = "stem-snaar";
+  knop.style.background = snaar.kleur;
+  knop.textContent = snaar.naam;
+  knop.addEventListener("click", () => kiesStemSnaar(nr));
+  stemSnarenVak.appendChild(knop);
+});
+
+async function startStemhut() {
+  stemGitaar = 0;
+  gestemd = [false, false, false, false, false, false];
+  tekenGitaren();
+  toonBeurt(stemGitaar);
+  if (!(await zetMicrofoonAan())) return;
+  luisterNaar(stemLuister);
+  kiesStemSnaar(0);
+}
+
+function tekenGitaren() {
+  gitaarBadges.forEach((badge, nr) => {
+    badge.classList.toggle("nu", nr === stemGitaar);
+    badge.classList.toggle("klaar", nr < stemGitaar);
+  });
+}
+
+function kiesStemSnaar(nr) {
+  stemSnaar = nr;
+  stemGoedTeller = 0;
+  stemMetingen = [];
+  [...stemSnarenVak.children].forEach((knop, i) => {
+    knop.classList.toggle("nu", i === nr);
+    knop.classList.toggle("gestemd", gestemd[i]);
+  });
+  toonNaald(null);
+  const snaar = SNAREN[nr];
+  stemHint.textContent = "🎸 ?";
+  zeg(`${SPELERS[stemGitaar].naam}. Speel de ${snaar.kleurnaam} snaar. Dat is ${snaar.plek}.`);
+}
+
+// Zet de naald op de meter. centen = null: geen toon, naald in het midden.
+function toonNaald(cent) {
+  naald.classList.toggle("weg", cent === null);
+  const plek = cent === null ? 0 : Math.max(-50, Math.min(50, cent)); // -50 tot +50
+  naald.style.left = 50 + plek + "%";
+}
+
+// Dit gebeurt elke keer als de microfoon iets hoort
+function stemLuister({ freq }) {
+  if (wachten) return;
+  if (!freq) {            // stilte: opnieuw beginnen met tellen
+    stemMetingen = [];
+    return;
+  }
+
+  // Hoeveel zit deze toon naast de toon die het moet zijn?
+  let cent = centen(freq, SNAREN[stemSnaar].freq);
+  // Een octaaf (1200 centen) hoger of lager is dezelfde toon: die tellen we mee
+  while (cent > 600) cent -= 1200;
+  while (cent < -600) cent += 1200;
+
+  stemMetingen.push(cent);
+  if (stemMetingen.length > 5) stemMetingen.shift(); // alleen de laatste 5
+  if (stemMetingen.length < 3) return;               // eerst even luisteren
+
+  const midden = mediaan(stemMetingen);
+  toonNaald(midden);
+
+  if (Math.abs(midden) <= ZUIVER) {
+    stemHint.textContent = "✅ Goed zo!";
+    stemGoedTeller++;
+    if (stemGoedTeller >= VASTHOUDEN) snaarGestemd();
+  } else {
+    stemGoedTeller = Math.max(0, stemGoedTeller - 1);
+    const teLaag = midden < 0;
+    stemHint.textContent = teLaag ? "⬆️ Te laag: draai strakker" : "⬇️ Te hoog: draai losser";
+    // De leraar zegt het hardop, maar niet te vaak
+    if (performance.now() - laatsteTip > 7000) {
+      laatsteTip = performance.now();
+      zeg(teLaag ? "Een beetje te laag. Draai het knopje zo dat de snaar strakker wordt."
+                 : "Een beetje te hoog. Draai het knopje zo dat de snaar losser wordt.");
+    }
+  }
+}
+
+function snaarGestemd() {
+  wachten = true;
+  gestemd[stemSnaar] = true;
+  stemSnarenVak.children[stemSnaar].classList.add("gestemd");
+  speelJippie();
+  setTimeout(() => {
+    wachten = false;
+    volgendeStemSnaar();
+  }, 1200);
+}
+
+// Door naar de volgende snaar, of naar de volgende gitaar
+function volgendeStemSnaar() {
+  const nogTeDoen = gestemd.findIndex((klaar, i) => !klaar && i > stemSnaar);
+  if (nogTeDoen !== -1) {
+    kiesStemSnaar(nogTeDoen);
+  } else {
+    gitaarKlaar();
+  }
+}
+
+function gitaarKlaar() {
+  if (stemGitaar === 0) {
+    // Grote gitaar klaar: nu de kleine
+    stemGitaar = 1;
+    gestemd = [false, false, false, false, false, false];
+    tekenGitaren();
+    toonBeurt(stemGitaar);
+    zeg("Super! De grote gitaar is gestemd. Nu de kleine gitaar.");
+    wachten = true;
+    setTimeout(() => { wachten = false; kiesStemSnaar(0); }, 3500);
+  } else {
+    // Allebei gestemd: ster!
+    luisterNaar(null);
+    zeg("Hoera! Allebei de gitaren zijn gestemd.");
+    verdienSter(huidigEiland);
+  }
+}
+
+// ⏭ Lukt een snaar niet? Dan mag je hem overslaan.
+document.getElementById("stem-overslaan").addEventListener("click", () => {
+  if (!wachten) volgendeStemSnaar();
+});
+
+
+// ---------- 9. Eiland 2: Regenboogsnaren ----------
+// Speel op je échte gitaar de snaar met dezelfde kleur als de stip.
 const snarenVak = document.getElementById("snaren");
 const doelStip = document.getElementById("doel-stip");
-let doelSnaar = null; // welke snaar moet je aantikken (0 t/m 5)
+let doelSnaar = null;       // welke snaar moet je spelen (0 t/m 5)
+let regenBeurt = 0;         // wie is er aan de beurt (0 of 1)
+let laatstGehoord = null;    // de snaar die we net hoorden (klinkt misschien nog na)
+let nieuweAanslag = false;  // is er sindsdien opnieuw een snaar aangeslagen?
+let gehoordReeks = [];      // de laatste snaren die de microfoon hoorde
 
-// Maak de 6 snaren één keer aan
+// Maak de 6 snaren één keer aan. Tik erop = hoor hoe die snaar moet klinken.
 SNAREN.forEach((snaar, nr) => {
   const knop = document.createElement("button");
   knop.className = "snaar";
-  // De gekleurde balk, en een toetsplaatje (1 t/m 6) voor op de laptop
-  knop.innerHTML = `<kbd class="toets">${nr + 1}</kbd>` +
-    `<div class="lijn" style="height:${snaar.dikte}px; background:${snaar.kleur}"></div>`;
-  // "pointerdown" reageert direct bij aanraken (sneller dan "click")
-  knop.addEventListener("pointerdown", () => tikSnaar(nr, knop));
+  knop.innerHTML = `<div class="lijn" style="height:${snaar.dikte}px; background:${snaar.kleur}"></div>`;
+  knop.addEventListener("pointerdown", () => {
+    speelToon(snaar.freq);
+    animeer(knop, "trilt");
+  });
   snarenVak.appendChild(knop);
 });
+
+async function startRegenboog() {
+  regenBeurt = 0;
+  doelSnaar = null;
+  laatstGehoord = null;
+  if (!(await zetMicrofoonAan())) return;
+  luisterNaar(regenboogLuister);
+  nieuweRegenboogOpdracht();
+}
 
 // Kies een willekeurige snaar (niet dezelfde als net)
 function nieuweRegenboogOpdracht() {
@@ -285,27 +551,63 @@ function nieuweRegenboogOpdracht() {
     nieuw = Math.floor(Math.random() * SNAREN.length);
   } while (nieuw === doelSnaar);
   doelSnaar = nieuw;
+  gehoordReeks = [];
+
   doelStip.style.background = SNAREN[doelSnaar].kleur;
-  setTimeout(() => speelToon(SNAREN[doelSnaar].freq), 300); // laat de toon alvast horen
+  snarenVak.classList.add("heeft-doel");
+  [...snarenVak.children].forEach((knop, i) => knop.classList.toggle("doel", i === doelSnaar));
+  toonBeurt(regenBeurt);
+  const snaar = SNAREN[doelSnaar];
+  zeg(`${SPELERS[regenBeurt].naam}. Speel de ${snaar.kleurnaam} snaar. Dat is ${snaar.plek}.`);
 }
 
-function tikSnaar(nr, knop) {
-  speelToon(SNAREN[nr].freq);
-  animeer(knop, "trilt");
+// Dit gebeurt elke keer als de microfoon iets hoort
+function regenboogLuister({ freq, aanslag }) {
   if (wachten) return;
+  if (aanslag) {
+    nieuweAanslag = true;
+    gehoordReeks = [];
+  }
+  if (!freq) return;
+
+  const nr = welkeSnaar(freq);
+  if (nr === null) return;
+
+  // Klinkt de vorige snaar nog na, en is er niet opnieuw aangeslagen? Niet meetellen.
+  if (nr === laatstGehoord && !nieuweAanslag) return;
+
+  // Pas als we 3 keer achter elkaar dezelfde snaar horen, weten we het zeker
+  gehoordReeks.push(nr);
+  const laatste3 = gehoordReeks.slice(-3);
+  if (laatste3.length === 3 && laatste3.every(n => n === nr)) {
+    hoorSnaar(nr);
+  }
+}
+
+// De app heeft snaar nr gehoord. Was dat de goede?
+function hoorSnaar(nr) {
+  if (wachten) return;
+  laatstGehoord = nr;
+  nieuweAanslag = false;
+  gehoordReeks = [];
+  const knop = snarenVak.children[nr];
+  animeer(knop, "trilt");
+  knop.classList.add("gehoord");
+  setTimeout(() => knop.classList.remove("gehoord"), 1300);
 
   if (nr === doelSnaar) {
-    knop.classList.add("goed");
-    setTimeout(() => knop.classList.remove("goed"), 1300);
-    opdrachtGoed(nieuweRegenboogOpdracht);
+    opdrachtGoed(() => {
+      regenBeurt = 1 - regenBeurt; // nu is de ander aan de beurt
+      nieuweRegenboogOpdracht();
+    });
   } else {
     opdrachtFout(knop);
+    setTimeout(() => zeg(`Dat was de ${SNAREN[nr].kleurnaam} snaar. Probeer het nog een keer.`), 500);
   }
 }
 
 
-
-// ---------- 8. Eiland 2: Palmritme ----------
+// ---------- 10. Eiland 3: Palmritme ----------
 // Luister hoe vaak de gitaar tokkelt (elke tokkel = een kokosnoot),
 // en tokkel daarna zelf even vaak op de grote knop.
 const kokosVak = document.getElementById("kokosnoten");
@@ -413,7 +715,7 @@ function controleerPalm() {
 
 
 
-// ---------- 9. Eiland 3: Akkoordkasteel ----------
+// ---------- 11. Eiland 4: Akkoordkasteel ----------
 // Luister naar het akkoord: klinkt het blij (E) of verdrietig (Em)?
 let kasteelDoel = null; // "blij" of "sip"
 
@@ -443,20 +745,14 @@ function kiesAkkoord(knop) {
 }
 
 
-// ---------- Luisterknoppen (👂) ----------
-// Elk eiland heeft een 👂-knop. Wat je hoort, hangt af van het eiland.
-const LUISTEREN = [
-  () => speelToon(SNAREN[doelSnaar].freq),            // Regenboogsnaren: de toon
-  () => { if (!wachten) speelPalmVoorbeeld(); },      // Palmritme: het ritme
-  () => speelAkkoord(AKKOORDEN[kasteelDoel]),         // Akkoordkasteel: het akkoord
-];
-
+// ---------- Luisterknoppen (👂 en 🔊) ----------
+// Wat je hoort, hangt af van het eiland (zie "luister" in EILANDEN bovenaan).
 document.querySelectorAll(".luister-knop").forEach(knop => {
-  knop.addEventListener("click", () => LUISTEREN[huidigEiland]());
+  knop.addEventListener("click", () => EILANDEN[huidigEiland].luister());
 });
 
 
-// ---------- 10. Ster verdienen ----------
+// ---------- 12. Ster verdienen ----------
 let nieuwEiland = null; // naar welk eiland loopt het poppetje straks
 
 function verdienSter(eilandNr) {
@@ -465,14 +761,15 @@ function verdienSter(eilandNr) {
   // Volgende eiland openen (als dat er is en nog dicht was)
   nieuwEiland = null;
   const volgende = eilandNr + 1;
-  if (volgende < EILAND_SCHERMEN.length && voortgang.open <= volgende) {
+  if (volgende < EILANDEN.length && voortgang.open <= volgende) {
     voortgang.open = volgende + 1;
     nieuwEiland = volgende;
   }
   bewaarVoortgang();
 
   // Alle eilanden klaar? Dan een beker in plaats van alleen "Super!"
-  const allesKlaar = voortgang.klaar.length === EILAND_SCHERMEN.length;
+  const speelbaar = EILANDEN.filter(e => e.scherm).length;
+  const allesKlaar = voortgang.klaar.length === speelbaar;
   document.querySelector("#feest p").textContent = allesKlaar ? "🏆 Kampioen!" : "Super!";
 
   document.getElementById("feest").classList.remove("verborgen");
@@ -497,7 +794,7 @@ document.getElementById("verder").addEventListener("click", () => {
 });
 
 
-// ---------- 11. Toetsenbord (voor op de laptop) ----------
+// ---------- 13. Toetsenbord (voor op de laptop) ----------
 // Laat een knop er even "ingedrukt" uitzien, alsof je erop klikte
 function drukIn(knop) {
   knop.classList.add("ingedrukt");
@@ -556,9 +853,9 @@ document.addEventListener("keydown", (e) => {
   }
 
   // Toetsen die per eiland verschillen
+  // Testen zonder gitaar: toets 1 t/m 6 = doen alsof je die snaar speelt
   if (scherm === "regenboog" && /^[1-6]$/.test(toets)) { // is het een cijfer 1 t/m 6?
-    const nr = Number(toets) - 1;             // toets "1" = snaar 0
-    tikSnaar(nr, snarenVak.children[nr]);
+    hoorSnaar(Number(toets) - 1);                         // toets "1" = snaar 0
   }
   if (scherm === "palm" && toets === " ") {
     e.preventDefault();
@@ -575,5 +872,5 @@ document.addEventListener("keydown", (e) => {
 });
 
 
-// ---------- 12. Start! ----------
+// ---------- 14. Start! ----------
 tekenKaart();
